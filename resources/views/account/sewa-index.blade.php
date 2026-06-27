@@ -64,11 +64,13 @@
                             <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             <span>Detail</span>
                         </a>
-                        <button type="button" @click="showConfirm = true"
-                            class="group flex items-center justify-center gap-2 uppercase text-xs font-bold text-stone-500 w-full flex-1 px-3 hover:bg-red-50 transition-colors hover:text-red-700 cursor-pointer">
-                            <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            <span>Hapus</span>
-                        </button>
+                        @if ($sewa->status_sewa === 'dibatalkan')
+                            <button type="button" @click="showConfirm = true"
+                                class="group flex items-center justify-center gap-2 uppercase text-xs font-bold text-stone-500 w-full flex-1 px-3 hover:bg-red-50 transition-colors hover:text-red-700 cursor-pointer">
+                                <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                <span>Hapus</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
 
@@ -78,32 +80,36 @@
                         <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         <span>Detail</span>
                     </a>
-                    <button type="button" @click="showConfirm = true"
-                        class="group flex items-center justify-center gap-2 uppercase text-xs font-bold text-stone-500 flex-1 py-2.5 hover:bg-red-50 transition-colors hover:text-red-700 cursor-pointer">
-                        <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        <span>Hapus</span>
-                    </button>
+                    @if ($sewa->status_sewa === 'dibatalkan')
+                        <button type="button" @click="showConfirm = true"
+                            class="group flex items-center justify-center gap-2 uppercase text-xs font-bold text-stone-500 flex-1 py-2.5 hover:bg-red-50 transition-colors hover:text-red-700 cursor-pointer">
+                            <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Hapus</span>
+                        </button>
+                    @endif
                 </div>
 
-                <div x-show="showConfirm" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
-                    <div class="absolute inset-0 bg-black/50" @click="showConfirm = false"></div>
-                    <div class="relative bg-white p-6 shadow-xl border border-stone-200 w-full max-w-sm mx-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-stone-900">Hapus Sewa</h3>
-                            <button @click="showConfirm = false" class="text-stone-400 hover:text-stone-600 transition cursor-pointer">
-                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                        <p class="text-sm text-stone-600 mb-6">Apakah Anda yakin ingin menghapus sewa ini? Data akan dihapus permanen.</p>
-                        <div class="flex gap-3 justify-end">
-                            <button @click="showConfirm = false" class="px-4 py-2 text-sm font-medium text-stone-600 border border-stone-300 hover:bg-stone-50 transition cursor-pointer">Batal</button>
-                            <form method="POST" action="/sewa/{{ $sewa->id }}/delete">
-                                @csrf
-                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition cursor-pointer">Ya, Hapus</button>
-                            </form>
+                @if ($sewa->status_sewa === 'dibatalkan')
+                    <div x-show="showConfirm" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
+                        <div class="absolute inset-0 bg-black/50" @click="showConfirm = false"></div>
+                        <div class="relative bg-white p-6 shadow-xl border border-stone-200 w-full max-w-sm mx-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-stone-900">Hapus Sewa</h3>
+                                <button @click="showConfirm = false" class="text-stone-400 hover:text-stone-600 transition cursor-pointer">
+                                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                            <p class="text-sm text-stone-600 mb-6">Apakah Anda yakin ingin menghapus sewa ini? Data akan dihapus permanen.</p>
+                            <div class="flex gap-3 justify-end">
+                                <button @click="showConfirm = false" class="px-4 py-2 text-sm font-medium text-stone-600 border border-stone-300 hover:bg-stone-50 transition cursor-pointer">Batal</button>
+                                <form method="POST" action="/sewa/{{ $sewa->id }}/delete">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition cursor-pointer">Ya, Hapus</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
             </div>
         @endforeach
     </div>

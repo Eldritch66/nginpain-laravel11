@@ -361,9 +361,11 @@ Route::middleware('auth')->group(function () {
         $sewa = Sewa::where('penyewa_id', $user->id)->findOrFail($sewaId);
         if ($sewa->status_sewa === 'dibatalkan') {
             $sewa->delete();
+
+            return redirect('/account/sewa')->with('success', 'Sewa berhasil dihapus.');
         }
 
-        return redirect('/account/sewa');
+        return redirect('/account/sewa')->with('error', 'Sewa hanya dapat dihapus jika statusnya dibatalkan.');
     })->name('sewa.delete');
 
     Route::get('/account/struk/{sewaId}', function ($sewaId) {
