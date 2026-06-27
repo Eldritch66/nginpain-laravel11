@@ -30,15 +30,15 @@ class PembayaranForm extends Component
     }
 
     #[Computed]
-    public function tax(): int
+    public function pemeliharaan(): int
     {
-        return (int) ceil($this->sewa->total_harga * 0.1);
+        return (int) ceil($this->sewa->total_harga * 0.05);
     }
 
     #[Computed]
     public function grandTotal(): int
     {
-        return $this->sewa->total_harga + $this->service_fee + $this->tax;
+        return $this->sewa->total_harga + $this->service_fee + $this->pemeliharaan;
     }
 
     public function submit()

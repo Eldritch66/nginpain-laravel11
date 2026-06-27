@@ -79,15 +79,15 @@ class PropertiDetail extends Component
     }
 
     #[Computed]
-    public function tax(): int
+    public function pemeliharaan(): int
     {
-        return (int) ceil($this->total_harga * 0.1);
+        return (int) ceil($this->total_harga * 0.05);
     }
 
     #[Computed]
     public function grandTotal(): float
     {
-        return $this->total_harga + $this->service_fee + $this->tax;
+        return $this->total_harga + $this->service_fee + $this->pemeliharaan;
     }
 
     public function book()

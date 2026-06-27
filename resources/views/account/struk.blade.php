@@ -72,8 +72,8 @@
                         $extraMonths = max(0, $sewa->durasi_bulan - 2);
                         $extraPrice = $extraMonths * $sewa->properti->harga_per_bulan;
                         $biayaLayanan = $sewa->biaya_layanan;
-                        $tax = (int) ceil($sewa->total_harga * 0.1);
-                        $grandTotal = $sewa->total_harga + $biayaLayanan + $tax;
+                        $biayaPemeliharaan = (int) ceil($sewa->total_harga * 0.05);
+                        $grandTotal = $sewa->total_harga + $biayaLayanan + $biayaPemeliharaan;
                     @endphp
                     <div class="flex justify-between text-stone-600">
                         <span>Harga 2 bulan pertama</span>
@@ -90,8 +90,8 @@
                         <span>Rp {{ number_format($biayaLayanan, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between text-stone-600">
-                        <span>Pajak (10%)</span>
-                        <span>Rp {{ number_format($tax, 0, ',', '.') }}</span>
+                        <span>Biaya Pemeliharaan (5%)</span>
+                            <span>Rp {{ number_format($biayaPemeliharaan, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between font-semibold text-stone-900 border-t border-stone-200 pt-2">
                         <span>Total Dibayar</span>

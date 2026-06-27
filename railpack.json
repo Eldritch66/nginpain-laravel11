@@ -1,0 +1,6 @@
+{
+  "$schema": "https://railpack.com/schema.json",
+  "php": {
+    "extensions": ["pdo_mysql", "mbstring", "bcmath", "gd", "xml", "curl", "zip"]
+  }
+}

@@ -155,8 +155,8 @@
                                 <span>Rp {{ number_format($this->service_fee, 0, ',', '.') }}</span>
                             </div>
                             <div class="mt-2 flex justify-between">
-                                <span>Pajak (10%)</span>
-                                <span>Rp {{ number_format($this->tax, 0, ',', '.') }}</span>
+                                <span>Biaya Pemeliharaan (5%)</span>
+                                <span>Rp {{ number_format($this->pemeliharaan, 0, ',', '.') }}</span>
                             </div>
                             <div class="mt-3 flex justify-between border-t border-stone-200 pt-3 font-semibold text-stone-950">
                                 <span>Total Pembayaran</span>

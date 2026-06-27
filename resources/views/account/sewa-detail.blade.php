@@ -50,15 +50,15 @@
             </div>
             @endif
             @php
-                $pajak = (int) ceil($sewa->total_harga * 0.1);
+                $biayaPemeliharaan = (int) ceil($sewa->total_harga * 0.05);
             @endphp
             <div class="flex justify-between">
-                <span>Pajak (10%)</span>
-                <span class="text-stone-900">Rp {{ number_format($pajak, 0, ',', '.') }}</span>
+                <span>Biaya Pemeliharaan (5%)</span>
+                <span class="text-stone-900">Rp {{ number_format($biayaPemeliharaan, 0, ',', '.') }}</span>
             </div>
             <div class="flex justify-between border-t border-stone-100 pt-3 font-semibold text-stone-900">
                 <span>Total Dibayar</span>
-                <span>Rp {{ number_format($sewa->total_harga + $sewa->biaya_layanan + $pajak, 0, ',', '.') }}</span>
+                <span>Rp {{ number_format($sewa->total_harga + $sewa->biaya_layanan + $biayaPemeliharaan, 0, ',', '.') }}</span>
             </div>
         </div>
 
