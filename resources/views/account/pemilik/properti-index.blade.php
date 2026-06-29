@@ -45,7 +45,10 @@
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0">
                                     <h3 class="text-base sm:text-xl font-semibold text-stone-900 truncate">{{ $properti->nama_properti }}</h3>
-                                    <p class="text-xs sm:text-sm text-stone-500">{{ $properti->tipe }} &middot; {{ $properti->kota }} &middot; Rp {{ number_format($properti->harga_per_bulan, 0, ',', '.') }}/bln</p>
+                                    <p class="text-xs sm:text-sm text-stone-500">
+                                        <span class="font-mono text-stone-400">{{ $properti->kode_properti }}</span>
+                                        &middot; {{ $properti->tipe }} &middot; {{ $properti->kota }} &middot; Rp {{ number_format($properti->harga_per_bulan, 0, ',', '.') }}/bln
+                                    </p>
                                 </div>
                                 <div class="flex flex-col items-end shrink-0">
                                     @if ($status === 'aktif')

@@ -16,7 +16,7 @@
                 <span class="text-sm text-stone-300 hidden sm:inline">/</span>
                 <h1 class="text-sm font-medium text-stone-700">Bukti Pemesanan</h1>
             </div>
-            <span class="text-xs text-stone-400 font-mono">#INV/{{ str_pad($sewa->id, 5, '0', STR_PAD_LEFT) }}</span>
+            <span class="text-xs text-stone-400 font-mono">{{ $sewa->kode_booking }}</span>
         </div>
 
         <div class="px-6 py-6 space-y-6">
@@ -28,8 +28,13 @@
 
             <div class="flex items-start justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-stone-900">{{ $sewa->properti->nama_properti }}</h2>
-                    <p class="text-sm text-stone-500 mt-0.5">{{ $sewa->properti->tipe }} &middot; {{ $sewa->properti->kota }}</p>
+                    <div>
+                        <h2 class="text-lg font-semibold text-stone-900">{{ $sewa->properti->nama_properti }}</h2>
+                        <p class="text-sm text-stone-500 mt-0.5">
+                            <span class="font-mono">{{ $sewa->properti->kode_properti }}</span>
+                            &middot; {{ $sewa->properti->tipe }} &middot; {{ $sewa->properti->kota }}
+                        </p>
+                    </div>
                 </div>
                 <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700 shrink-0">
                     Menunggu Konfirmasi

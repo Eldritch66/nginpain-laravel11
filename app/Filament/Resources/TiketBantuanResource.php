@@ -4,15 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TiketBantuanResource\Pages;
 use App\Models\TiketBantuan;
-use Filament\Schemas\Components\Section;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -31,6 +31,9 @@ class TiketBantuanResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('no_tiket')
+                    ->label('No. Tiket')
+                    ->searchable(),
                 TextColumn::make('user.name')
                     ->label('Pengirim')
                     ->searchable(),
@@ -128,6 +131,8 @@ class TiketBantuanResource extends Resource
     {
         return $schema
             ->components([
+                TextEntry::make('no_tiket')
+                    ->label('No. Tiket'),
                 TextEntry::make('judul')
                     ->size('lg')
                     ->weight('bold'),

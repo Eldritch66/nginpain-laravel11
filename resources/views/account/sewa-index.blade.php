@@ -34,7 +34,11 @@
                         <div class="flex flex-col justify-center gap-1.5 px-3 sm:px-6 py-3 flex-1 min-w-0">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0">
-                                    <h3 class="text-base sm:text-xl font-semibold text-stone-900 truncate">{{ $sewa->properti->nama_properti }}</h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-base sm:text-xl font-semibold text-stone-900 truncate">{{ $sewa->properti->nama_properti }}</h3>
+                                        <span class="shrink-0 text-[10px] font-mono text-stone-400">{{ $sewa->properti->kode_properti }}</span>
+                                        <span class="shrink-0 text-[10px] font-mono text-orange-600">{{ $sewa->kode_booking }}</span>
+                                    </div>
                                     <p class="text-xs sm:text-sm text-stone-500">{{ $sewa->durasi_bulan }} bulan &middot; {{ \Carbon\Carbon::parse($sewa->tanggal_mulai)->locale('id')->translatedFormat('M Y') }} &mdash; {{ \Carbon\Carbon::parse($sewa->tanggal_selesai)->locale('id')->translatedFormat('M Y') }}</p>
                                 </div>
                                 <div class="flex flex-col items-end shrink-0">

@@ -29,6 +29,9 @@ class SewaResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('kode_booking')
+                    ->label('Kode Booking')
+                    ->searchable(),
                 TextColumn::make('penyewa.name')
                     ->label('Penyewa')
                     ->searchable(),
@@ -91,6 +94,8 @@ class SewaResource extends Resource
     {
         return $schema
             ->components([
+                TextEntry::make('kode_booking')
+                    ->label('Kode Booking'),
                 TextEntry::make('penyewa.name')
                     ->label('Penyewa'),
                 TextEntry::make('properti.nama_properti')

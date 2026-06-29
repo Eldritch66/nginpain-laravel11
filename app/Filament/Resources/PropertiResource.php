@@ -35,6 +35,10 @@ class PropertiResource extends Resource
                     ->label('Foto')
                     ->rounded()
                     ->size(40),
+                TextColumn::make('kode_properti')
+                    ->label('Kode')
+                    ->searchable()
+                    ->monospace(),
                 TextColumn::make('nama_properti')
                     ->searchable(),
                 TextColumn::make('pemilik.name')
@@ -59,6 +63,10 @@ class PropertiResource extends Resource
     {
         return $schema
             ->components([
+                TextInput::make('kode_properti')
+                    ->label('Kode Properti')
+                    ->disabled()
+                    ->dehydrated(false),
                 TextInput::make('nama_properti'),
                 Select::make('pemilik_id')
                     ->relationship('pemilik', 'name')
@@ -88,6 +96,9 @@ class PropertiResource extends Resource
                     ->imageSize(300)
                     ->stacked()
                     ->circular(),
+                TextEntry::make('kode_properti')
+                    ->label('Kode Properti')
+                    ->monospace(),
                 TextEntry::make('nama_properti'),
                 TextEntry::make('pemilik.name')
                     ->label('Pemilik'),

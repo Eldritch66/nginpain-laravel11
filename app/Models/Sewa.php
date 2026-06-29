@@ -9,9 +9,27 @@ class Sewa extends Model
     protected $table = 'sewa';
 
     protected $fillable = [
-        'penyewa_id', 'properti_id', 'tanggal_mulai', 'tanggal_selesai',
+        'kode_booking', 'penyewa_id', 'properti_id', 'tanggal_mulai', 'tanggal_selesai',
         'durasi_bulan', 'total_harga', 'biaya_layanan', 'status_sewa', 'disetujui_pada',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function ($sewa) {
+            if ($sewa->kode_booking) {
+                return;
+            }
+
+            $prefix = 'SW';
+            $ym = now()->format('ym');
+            $last = static::where('kode_booking', 'like', $prefix.'-'.$ym.'-%')
+                ->orderBy('kode_booking', 'desc')
+                ->lockForUpdate()
+                ->value('kode_booking');
+            $next = $last ? (int) substr($last, -3) + 1 : 1;
+            $sewa->kode_booking = $prefix.'-'.$ym.'-'.str_pad($next, 3, '0', STR_PAD_LEFT);
+        });
+    }
 
     protected function casts(): array
     {

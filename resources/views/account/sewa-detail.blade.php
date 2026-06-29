@@ -16,7 +16,13 @@
     @endif
     <div class="p-6 sm:p-8">
         <div class="flex items-center justify-between mb-4">
-            <h1 class="text-xl font-semibold text-stone-900">{{ $sewa->properti->nama_properti }}</h1>
+            <div class="min-w-0">
+                <h1 class="text-xl font-semibold text-stone-900">{{ $sewa->properti->nama_properti }}</h1>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-xs font-mono text-stone-400">{{ $sewa->properti->kode_properti }}</span>
+                    <span class="text-[11px] font-mono text-orange-600 font-medium">{{ $sewa->kode_booking }}</span>
+                </div>
+            </div>
             @if ($sewa->status_sewa === 'aktif')
                 <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Aktif</span>
             @elseif ($sewa->status_sewa === 'pending')

@@ -15,6 +15,8 @@
                     <div class="min-w-0 flex-1">
                         <h3 class="text-base font-semibold text-stone-900">{{ $tiket->judul }}</h3>
                         <p class="mt-0.5 text-sm text-stone-500">
+                            <span class="font-mono text-orange-500">{{ $tiket->no_tiket }}</span>
+                            &middot;
                             {{ ['teknis' => 'Teknis', 'pembayaran' => 'Pembayaran', 'properti' => 'Properti', 'akun' => 'Akun', 'lainnya' => 'Lainnya'][$tiket->kategori] ?? $tiket->kategori }} &middot; {{ $tiket->created_at->format('d M Y, H:i') }}
                         </p>
                     </div>

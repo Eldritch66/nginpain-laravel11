@@ -31,7 +31,8 @@
                 <h1 class="text-2xl font-semibold text-stone-900">{{ $properti->nama_properti }}</h1>
                 <p class="text-stone-500 mt-1 flex items-center gap-1.5 text-sm">
                     <svg class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    {{ $properti->tipe }} &middot; {{ $properti->kota }}
+                    <span class="font-mono text-stone-400">{{ $properti->kode_properti }}</span>
+                    &middot; {{ $properti->tipe }} &middot; {{ $properti->kota }}
                 </p>
                 <p class="text-stone-500 text-sm mt-0.5">{{ $properti->alamat }}</p>
             </div>
@@ -130,7 +131,11 @@
                         <div class="flex items-center justify-between bg-stone-50 px-4 py-3 text-sm">
                             <div class="min-w-0 flex-1">
                                 <p class="font-medium text-stone-800 truncate">{{ $s->penyewa->name ?? '—' }}</p>
-                                <p class="text-stone-400 text-xs">{{ \Carbon\Carbon::parse($s->tanggal_mulai)->locale('id')->translatedFormat('dd MMM yyyy') }} — {{ \Carbon\Carbon::parse($s->tanggal_selesai)->locale('id')->translatedFormat('dd MMM yyyy') }}</p>
+                                <p class="text-stone-400 text-xs">
+                                    <span class="font-mono text-orange-500">{{ $s->kode_booking }}</span>
+                                    &middot;
+                                    {{ \Carbon\Carbon::parse($s->tanggal_mulai)->locale('id')->translatedFormat('dd MMM yyyy') }} — {{ \Carbon\Carbon::parse($s->tanggal_selesai)->locale('id')->translatedFormat('dd MMM yyyy') }}
+                                </p>
                             </div>
                             <div class="text-right shrink-0 ml-4">
                                 <p class="font-semibold text-stone-800">Rp {{ number_format($s->total_harga, 0, ',', '.') }}</p>
