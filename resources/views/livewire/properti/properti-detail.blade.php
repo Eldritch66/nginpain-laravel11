@@ -84,7 +84,6 @@
 
                     <div class="flex items-start justify-between gap-4">
                         <h1 class="text-3xl font-semibold tracking-tight text-stone-950 sm:text-4xl">{{ $properti->nama_properti }}</h1>
-                        <span class="shrink-0 text-xs font-mono text-stone-400 mt-1.5">{{ $properti->kode_properti }}</span>
                     </div>
 
                     <div class="mt-3 flex items-center gap-1.5 text-sm text-stone-500">

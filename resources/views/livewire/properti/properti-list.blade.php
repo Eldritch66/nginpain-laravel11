@@ -30,7 +30,6 @@
                     <div class="p-4">
                         <div class="flex items-center gap-2">
                             <h2 class="font-semibold text-lg text-neutral-900 line-clamp-1">{{ $p->nama_properti }}</h2>
-                            <span class="shrink-0 text-[10px] font-mono text-neutral-400">{{ $p->kode_properti }}</span>
                         </div>
                         <p class="text-sm text-neutral-500 mt-0.5">{{ $p->kota }}</p>
 

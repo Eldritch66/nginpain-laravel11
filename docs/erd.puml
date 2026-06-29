@@ -1,0 +1,176 @@
+@startuml
+!theme plain
+skinparam backgroundColor #fefefe
+skinparam entity {
+  BackgroundColor #f8f4f0
+  BorderColor #8b7d72
+  FontColor #3d322c
+}
+skinparam relationship {
+  BackgroundColor #a67f71
+  BorderColor #8b7d72
+}
+
+' ============================================================
+' ENTITY: User
+' ============================================================
+entity "User\n(Pengguna)" as user {
+  + id [PK]
+  --
+  email
+  password
+  name
+  role
+  no_hp
+  avatar_url
+  provider_id
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: Admin
+' ============================================================
+entity "Admin" as admin {
+  + id [PK]
+  --
+  email
+  password
+  nama
+  last_login
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: Properti
+' ============================================================
+entity "Properti" as properti {
+  + id [PK]
+  --
+  kode_properti [UQ]
+  pemilik_id [FK]
+  nama_properti
+  tipe
+  alamat
+  kota
+  harga_per_bulan
+  harga_per_dua_bulan
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: FotoProperti
+' ============================================================
+entity "Foto Properti" as foto {
+  + id [PK]
+  --
+  properti_id [FK]
+  url
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: Unit
+' ============================================================
+entity "Unit" as unit {
+  + id [PK]
+  --
+  properti_id [FK]
+  luas_bangunan
+  jumlah_kamar_tidur
+  jumlah_kamar_mandi
+  kapasitas_penghuni
+  lantai
+  keterangan
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: Sewa
+' ============================================================
+entity "Sewa" as sewa {
+  + id [PK]
+  --
+  kode_booking [UQ]
+  penyewa_id [FK]
+  properti_id [FK]
+  tanggal_mulai
+  tanggal_selesai
+  durasi_bulan
+  total_harga
+  biaya_layanan
+  status_sewa
+  disetujui_pada
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: Pembayaran
+' ============================================================
+entity "Pembayaran" as pembayaran {
+  + id [PK]
+  --
+  kode_bayar [UQ]
+  sewa_id [FK]
+  jumlah
+  metode
+  status
+  periode_bulan
+  dibayar_pada
+  created_at
+  updated_at
+}
+
+' ============================================================
+' ENTITY: TiketBantuan
+' ============================================================
+entity "Tiket Bantuan" as tiket {
+  + id [PK]
+  --
+  no_tiket [UQ]
+  user_id [FK]
+  judul
+  pesan
+  kategori
+  status
+  balasan_admin
+  dijawab_oleh [FK]
+  dijawab_pada
+  created_at
+  updated_at
+}
+
+' ============================================================
+' RELATIONSHIPS
+' ============================================================
+
+' User — Properti (1:N)
+user ||--o{ properti : "memiliki"
+
+' User — Sewa (1:N)
+user ||--o{ sewa : "menyewa"
+
+' User — TiketBantuan (1:N)
+user ||--o{ tiket : "mengirim"
+
+' Properti — Sewa (1:N)
+properti ||--o{ sewa : "disewa"
+
+' Properti — FotoProperti (1:N)
+properti ||--o{ foto : "memiliki foto"
+
+' Properti — Unit (1:1)
+properti ||--|| unit : "detail"
+
+' Sewa — Pembayaran (1:N)
+sewa ||--o{ pembayaran : "dibayar"
+
+' Admin — TiketBantuan (1:N)
+admin ||--o{ tiket : "menjawab"
+
+@enduml

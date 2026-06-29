@@ -1,0 +1,192 @@
+@startuml
+!theme plain
+skinparam backgroundColor #fefefe
+skinparam class {
+  BackgroundColor #e8f0f8
+  BorderColor #4a6d8c
+  FontColor #2c3e50
+}
+skinparam classAttribute {
+  FontColor #2c3e50
+}
+skinparam classStereotype {
+  FontColor #2c3e50
+}
+skinparam arrow {
+  Color #4a6d8c
+}
+
+hide empty members
+
+' ============================================================
+' CLASS: User
+' ============================================================
+class User {
+  - id: int
+  - email: string
+  - password: string
+  - name: string
+  - role: string
+  - no_hp: ?string
+  - avatar_url: ?string
+  - provider_id: ?string
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + register(data): User
+  + login(email, password): bool
+  + logout(): void
+  + updateProfile(data): User
+  + deleteAccount(): void
+}
+
+' ============================================================
+' CLASS: Admin
+' ============================================================
+class Admin {
+  - id: int
+  - email: string
+  - password: string
+  - nama: string
+  - last_login: ?timestamp
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + login(email, password): bool
+  + logout(): void
+  + answerTicket(tiketId, balasan): TiketBantuan
+}
+
+' ============================================================
+' CLASS: Properti
+' ============================================================
+class Properti {
+  - id: int
+  - pemilik_id: int
+  - kode_properti: string
+  - nama_properti: string
+  - tipe: enum(kost,kontrakan)
+  - alamat: text
+  - kota: string
+  - harga_per_bulan: ?int
+  - harga_per_dua_bulan: ?int
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + create(data): Properti
+  + update(data): Properti
+  + delete(): void
+  + getByKota(kota): Collection
+  + getByPemilik(userId): Collection
+}
+
+' ============================================================
+' CLASS: FotoProperti
+' ============================================================
+class FotoProperti {
+  - id: int
+  - properti_id: int
+  - url: string
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + upload(file): FotoProperti
+  + delete(): void
+}
+
+' ============================================================
+' CLASS: Unit
+' ============================================================
+class Unit {
+  - id: int
+  - properti_id: int
+  - luas_bangunan: ?decimal
+  - jumlah_kamar_tidur: int
+  - jumlah_kamar_mandi: int
+  - kapasitas_penghuni: int
+  - lantai: int
+  - keterangan: ?text
+  - created_at: timestamp
+  - updated_at: timestamp
+}
+
+' ============================================================
+' CLASS: Sewa
+' ============================================================
+class Sewa {
+  - id: int
+  - kode_booking: ?string
+  - penyewa_id: int
+  - properti_id: int
+  - tanggal_mulai: date
+  - tanggal_selesai: date
+  - durasi_bulan: int
+  - total_harga: decimal
+  - biaya_layanan: decimal
+  - status_sewa: string
+  - disetujui_pada: ?datetime
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + createBooking(data): Sewa
+  + confirmPayment(): void
+  + cancel(): void
+  + approve(): void
+  + generateKodeBooking(): void
+}
+
+' ============================================================
+' CLASS: Pembayaran
+' ============================================================
+class Pembayaran {
+  - id: int
+  - kode_bayar: ?string
+  - sewa_id: int
+  - jumlah: decimal
+  - metode: string
+  - status: string
+  - periode_bulan: string
+  - dibayar_pada: ?datetime
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + processPayment(data): Pembayaran
+  + refund(): void
+}
+
+' ============================================================
+' CLASS: TiketBantuan
+' ============================================================
+class TiketBantuan {
+  - id: int
+  - no_tiket: ?string
+  - user_id: int
+  - judul: string
+  - pesan: text
+  - kategori: string
+  - status: string
+  - balasan_admin: ?text
+  - dijawab_oleh: ?int
+  - dijawab_pada: ?datetime
+  - created_at: timestamp
+  - updated_at: timestamp
+  --
+  + send(data): TiketBantuan
+  + close(): void
+  + reply(balasan): void
+}
+
+' ============================================================
+' RELATIONSHIPS (UML directed association)
+' ============================================================
+
+User "1" --> "*" Sewa : menyewa
+User "1" --> "*" Properti : memiliki
+User "1" --> "*" TiketBantuan : mengirim
+Admin "1" --> "*" TiketBantuan : menjawab
+Properti "1" --> "*" Sewa : disewa
+Properti "1" --> "*" FotoProperti : foto
+Properti "1" --> "1" Unit : detail
+Sewa "1" --> "*" Pembayaran : dibayar
+
+@enduml

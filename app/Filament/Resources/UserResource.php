@@ -6,6 +6,8 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers\PropertiRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\SewaRelationManager;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -56,6 +58,22 @@ class UserResource extends Resource
                         'penyewa' => 'Penyewa',
                         'new' => 'Baru',
                     ]),
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make()
+                    ->disabled(fn (User $record) => $record->hasActiveSewa() || $record->hasPropertiWithActiveSewa())
+                    ->tooltip(fn (User $record) => $record->hasActiveSewa()
+                        ? 'User masih memiliki sewa aktif'
+                        : ($record->hasPropertiWithActiveSewa()
+                            ? 'Properti user masih ada yang disewa'
+                            : ''))
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Pengguna')
+                    ->modalDescription(fn (User $record) => $record->properti()->exists()
+                        ? 'Pengguna ini memiliki properti dengan riwayat sewa. Properti akan dihapus permanen dan riwayat sewa penyewa akan kehilangan referensi properti. Lanjutkan?'
+                        : 'Yakin ingin menghapus pengguna ini?')
+                    ->action(fn (User $record) => $record->forceDelete()),
             ]);
     }
 
@@ -72,7 +90,9 @@ class UserResource extends Resource
                         'pemilik' => 'Pemilik',
                         'penyewa' => 'Penyewa',
                         'new' => 'Baru',
-                    ]),
+                    ])
+                    ->disabled(fn (?User $record) => $record && ($record->hasActiveSewa() || $record->hasProperti()))
+                    ->hint(fn (?User $record) => $record && ($record->hasActiveSewa() || $record->hasProperti()) ? 'Role tidak bisa diubah karena user masih memiliki sewa aktif atau properti' : ''),
             ]);
     }
 
@@ -110,6 +130,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'view' => Pages\ViewUser::route('/{record}'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

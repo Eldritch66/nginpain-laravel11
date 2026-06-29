@@ -13,20 +13,18 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $pemilik = User::factory()->create([
-            'name' => 'Budi Pemilik',
-            'email' => 'pemilik@test.com',
-            'role' => 'pemilik',
+        $this->call([
+            AdminSeeder::class,
+            UserSeeder::class,
+            PropertiSeeder::class,
         ]);
 
-        $penyewa = User::factory()->create([
-            'name' => 'Ani Penyewa',
-            'email' => 'penyewa@test.com',
-            'role' => 'penyewa',
-        ]);
+        $pemilik = User::where('email', 'pemilik@test.com')->first();
+        $penyewa = User::where('email', 'penyewa@test.com')->first();
 
         $properti = Properti::create([
             'pemilik_id' => $pemilik->id,
+            'kode_properti' => 'KSN001',
             'nama_properti' => 'Kos Putri Asri',
             'tipe' => 'kost',
             'alamat' => 'Jl. Merdeka No. 123, Bogor',
@@ -47,6 +45,7 @@ class DatabaseSeeder extends Seeder
 
         $properti2 = Properti::create([
             'pemilik_id' => $pemilik->id,
+            'kode_properti' => 'KNK001',
             'nama_properti' => 'Kontrakan Keluarga',
             'tipe' => 'kontrakan',
             'alamat' => 'Jl. Raya Pajajaran No. 45, Bogor',
@@ -67,6 +66,7 @@ class DatabaseSeeder extends Seeder
 
         $properti3 = Properti::create([
             'pemilik_id' => $pemilik->id,
+            'kode_properti' => 'KSN002',
             'nama_properti' => 'Kos Putra Damai',
             'tipe' => 'kost',
             'alamat' => 'Jl. Siliwangi No. 78, Bogor',
@@ -104,5 +104,7 @@ class DatabaseSeeder extends Seeder
             'periode_bulan' => 2,
             'dibayar_pada' => now(),
         ]);
+
+        $sewa->generateKodeBooking();
     }
 }

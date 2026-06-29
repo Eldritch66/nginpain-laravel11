@@ -4,6 +4,7 @@ namespace App\Livewire\Pembayaran;
 
 use App\Models\Sewa;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -52,11 +53,15 @@ class PembayaranForm extends Component
             return;
         }
 
-        $this->sewa->pembayaran()->create([
-            'metode' => $this->metode,
-            'jumlah' => $this->grand_total,
-            'status' => 'lunas',
-        ]);
+        DB::transaction(function () {
+            $this->sewa->pembayaran()->create([
+                'metode' => $this->metode,
+                'jumlah' => $this->grand_total,
+                'status' => 'lunas',
+            ]);
+
+            $this->sewa->generateKodeBooking();
+        });
 
         return $this->redirect('/account/struk/'.$this->sewa->id);
     }

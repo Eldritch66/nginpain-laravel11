@@ -75,11 +75,30 @@ SW-{YY}{MM}-{3 digit urutan}
 | MM | 2 | 2 digit bulan (contoh: `06` untuk Juni) |
 | Urutan | 3 digit | `001` – `999`, **reset setiap bulan** |
 
+### Alur Generasi
+
+`kode_booking` **tidak** di-generate saat sewa dibuat (`pending`), melainkan **setelah pembayaran berhasil** dilakukan. Ini memastikan nomor booking hanya muncul untuk sewa yang sudah memiliki transaksi.
+
+```
+Sewa dibuat (pending)      → kode_booking = null
+       ↓
+User melakukan pembayaran  → Pembayaran::create()
+       ↓
+generateKodeBooking()      → kode_booking = "SW-2606-001"
+       ↓
+Redirect ke halaman struk  → kode_booking ditampilkan
+```
+
 ### Cara Kerja
 
 ```php
-// app/Models/Sewa.php — booted()
-static::creating(function ($sewa) {
+// app/Models/Sewa.php — generateKodeBooking()
+public function generateKodeBooking(): void
+{
+    if ($this->kode_booking) {
+        return;
+    }
+
     $prefix = 'SW';
     $ym = now()->format('ym');
     $last = static::where('kode_booking', 'like', $prefix.'-'.$ym.'-%')
@@ -87,7 +106,19 @@ static::creating(function ($sewa) {
         ->lockForUpdate()
         ->value('kode_booking');
     $next = $last ? (int) substr($last, -3) + 1 : 1;
-    $sewa->kode_booking = $prefix.'-'.$ym.'-'.str_pad($next, 3, '0', STR_PAD_LEFT);
+    $this->updateQuietly([
+        'kode_booking' => $prefix.'-'.$ym.'-'.str_pad($next, 3, '0', STR_PAD_LEFT),
+    ]);
+}
+```
+
+Dipanggil dari `PembayaranForm::submit()` setelah pembayaran berhasil dibuat:
+
+```php
+// app/Livewire/Pembayaran/PembayaranForm.php
+DB::transaction(function () {
+    $this->sewa->pembayaran()->create([...]);
+    $this->sewa->generateKodeBooking();
 });
 ```
 
@@ -217,17 +248,30 @@ Semua pengkodean mengikuti pola yang sama:
 
 ### 5.1 Arsitektur
 
+Sebagian besar entitas menggunakan `booted()` → `creating` hook untuk auto-generate. Pengecualian: **Sewa** (`kode_booking`) di-generate manual setelah pembayaran.
+
+**Pola umum (Properti, Pembayaran, Tiket):**
+
 ```
-Eloquent Model
-  └── booted() ──→ static::creating()
-                      ├── Skip jika sudah diisi manual
-                      ├── Cari kode terakhir dengan LIKE prefix + lockForUpdate()
-                      ├── Increment nomor urut
-                      └── Set kolom kode
+Eloquent Model (booted → creating hook)
+  ├── Skip jika sudah diisi manual
+  ├── Cari kode terakhir dengan LIKE prefix + lockForUpdate()
+  ├── Increment nomor urut
+  └── Set kolom kode
 
 Migration
   └── add_column (string, unique, nullable, after id)
        └── Backfill data existing dengan counter terpisah
+```
+
+**Pengecualian — Sewa (kode_booking):**
+
+```
+Sewa::create()             → kode_booking = null (no hook)
+       ↓
+Pembayaran::create()       → kode_bayar auto-generated via hook
+       ↓
+Sewa::generateKodeBooking() → kode_booking = "SW-2606-001"
 ```
 
 ### 5.2 Aturan
@@ -235,9 +279,9 @@ Migration
 | Aturan | Penjelasan |
 |--------|------------|
 | Bukan primary key | `id` (auto-increment) tetap sebagai PK, kode hanya unique identifier |
-| Auto-generated | Dibuat otomatis via `creating` hook, tidak perlu diisi manual |
+| Auto-generated | Umumnya via `creating` hook, kecuali Sewa via method manual |
 | Race condition safe | `lockForUpdate()` mencegah duplikasi kode saat concurrent request |
-| Skip jika diisi | Jika kolom sudah terisi, hook tidak menimpa |
+| Skip jika diisi | Jika kolom sudah terisi, tidak ditimpa |
 | Backfill migration | Data existing mendapat kode saat migration dijalankan |
 
 ### 5.3 Ringkasan Format

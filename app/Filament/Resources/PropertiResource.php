@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PropertiResource\Pages;
 use App\Models\Properti;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -37,8 +39,7 @@ class PropertiResource extends Resource
                     ->size(40),
                 TextColumn::make('kode_properti')
                     ->label('Kode')
-                    ->searchable()
-                    ->monospace(),
+                    ->searchable(),
                 TextColumn::make('nama_properti')
                     ->searchable(),
                 TextColumn::make('pemilik.name')
@@ -56,6 +57,10 @@ class PropertiResource extends Resource
                         'kost' => 'Kost',
                         'kontrakan' => 'Kontrakan',
                     ]),
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 
@@ -97,8 +102,7 @@ class PropertiResource extends Resource
                     ->stacked()
                     ->circular(),
                 TextEntry::make('kode_properti')
-                    ->label('Kode Properti')
-                    ->monospace(),
+                    ->label('Kode Properti'),
                 TextEntry::make('nama_properti'),
                 TextEntry::make('pemilik.name')
                     ->label('Pemilik'),
@@ -119,7 +123,9 @@ class PropertiResource extends Resource
     {
         return [
             'index' => Pages\ListPropertis::route('/'),
+            'create' => Pages\CreateProperti::route('/create'),
             'view' => Pages\ViewProperti::route('/{record}'),
+            'edit' => Pages\EditProperti::route('/{record}/edit'),
         ];
     }
 }
