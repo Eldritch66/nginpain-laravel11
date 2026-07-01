@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Pembayaran;
 
-use App\Models\Sewa;
+use App\Services\MidtransService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,58 +12,76 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class PembayaranForm extends Component
 {
-    public Sewa $sewa;
-
-    public string $metode = '';
-
-    public function mount(string $sewaId)
-    {
-        $user = Auth::user();
-        $this->sewa = Sewa::with('properti')
-            ->where('penyewa_id', $user->id)
-            ->findOrFail($sewaId);
-    }
-
     #[Computed]
-    public function serviceFee(): int
+    public function booking(): ?array
     {
-        return 25000;
-    }
-
-    #[Computed]
-    public function pemeliharaan(): int
-    {
-        return (int) ceil($this->sewa->total_harga * 0.05);
+        return session('booking');
     }
 
     #[Computed]
     public function grandTotal(): int
     {
-        return $this->sewa->total_harga + $this->service_fee + $this->pemeliharaan;
+        return (int) ($this->booking['grand_total'] ?? 0);
     }
 
     public function submit()
     {
-        $this->validate(['metode' => 'required|in:QRIS,Transfer BCA,PayPal']);
+        $booking = $this->booking;
 
-        $user = Auth::user();
-        if ($this->sewa->penyewa_id !== $user->id) {
-            session()->flash('error', 'Sewa tidak ditemukan');
+        if (! $booking) {
+            session()->flash('error', 'Sesi booking tidak ditemukan. Silakan pilih properti terlebih dahulu.');
 
             return;
         }
 
-        DB::transaction(function () {
-            $this->sewa->pembayaran()->create([
-                'metode' => $this->metode,
-                'jumlah' => $this->grand_total,
-                'status' => 'lunas',
-            ]);
+        $user = Auth::user();
 
-            $this->sewa->generateKodeBooking();
-        });
+        $orderId = 'PAY-'.Auth::id().'-'.strtoupper(substr(uniqid(), -6));
 
-        return $this->redirect('/account/struk/'.$this->sewa->id);
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $booking['grand_total'],
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+            'item_details' => [
+                [
+                    'id' => $booking['properti_kode'],
+                    'price' => (int) $booking['total_harga'],
+                    'quantity' => 1,
+                    'name' => 'Sewa '.$booking['properti_nama'].' ('.$booking['months'].' bln)',
+                ],
+                [
+                    'id' => 'BIAYA-LAYANAN',
+                    'price' => (int) $booking['service_fee'],
+                    'quantity' => 1,
+                    'name' => 'Biaya Layanan',
+                ],
+                [
+                    'id' => 'PEMELIHARAAN',
+                    'price' => (int) $booking['pemeliharaan'],
+                    'quantity' => 1,
+                    'name' => 'Biaya Pemeliharaan',
+                ],
+            ],
+            'callbacks' => [
+                'finish' => url('/payment/finish?order_id='.$orderId),
+            ],
+        ];
+
+        try {
+            $midtrans = app(MidtransService::class);
+            $token = $midtrans->getSnapToken($params);
+
+            Cache::put('booking_'.$orderId, array_merge($booking, ['order_id' => $orderId, 'snap_token' => $token]), 7200);
+
+            return $this->redirect('https://app.sandbox.midtrans.com/snap/v4/redirection/'.$token);
+        } catch (\Throwable $e) {
+            session()->flash('error', 'Gagal terhubung ke Midtrans: '.$e->getMessage());
+        }
     }
 
     public function render()

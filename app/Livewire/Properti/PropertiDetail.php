@@ -115,21 +115,22 @@ class PropertiDetail extends Component
             return;
         }
 
-        $startDate = now('Asia/Jakarta');
-        $endDate = now('Asia/Jakarta')->addMonths($this->months);
-
-        $sewa = Sewa::create([
-            'penyewa_id' => $user->id,
+        session(['booking' => [
             'properti_id' => $this->properti->id,
-            'tanggal_mulai' => $startDate->format('Y-m-d'),
-            'tanggal_selesai' => $endDate->format('Y-m-d'),
-            'durasi_bulan' => $this->months,
+            'properti_nama' => $this->properti->nama_properti,
+            'properti_kode' => $this->properti->kode_properti,
+            'properti_tipe' => $this->properti->tipe,
+            'properti_kota' => $this->properti->kota,
+            'months' => $this->months,
             'total_harga' => $this->total_harga,
-            'biaya_layanan' => $this->service_fee,
-            'status_sewa' => 'pending',
-        ]);
+            'service_fee' => $this->service_fee,
+            'pemeliharaan' => $this->pemeliharaan,
+            'grand_total' => $this->grand_total,
+            'start_date' => now('Asia/Jakarta')->format('Y-m-d'),
+            'end_date' => now('Asia/Jakarta')->addMonths($this->months)->format('Y-m-d'),
+        ]]);
 
-        return $this->redirect('/pembayaran/'.$sewa->id, navigate: true);
+        return $this->redirect('/pembayaran', navigate: true);
     }
 
     public function render()

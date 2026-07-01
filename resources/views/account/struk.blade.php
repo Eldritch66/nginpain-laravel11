@@ -64,8 +64,36 @@
                     <p class="font-semibold text-stone-800 mt-1">{{ $sewa->durasi_bulan }} bulan</p>
                 </div>
                 <div class="bg-stone-50 rounded-xl p-4">
-                    <p class="text-xs text-stone-400 uppercase tracking-wide font-medium">Metode Pembayaran</p>
-                    <p class="font-semibold text-stone-800 mt-1">{{ $sewa->pembayaran->first()->metode ?? '—' }}</p>
+                    <p class="text-xs text-stone-400 uppercase tracking-wide font-medium">Status Pembayaran</p>
+                    <p class="font-semibold text-stone-800 mt-1">
+                        @php
+                            $pay = $sewa->pembayaran->first();
+                        @endphp
+                        @if ($pay)
+                            @switch($pay->status)
+                                @case('lunas')
+                                    <span class="text-green-600">Lunas</span>
+                                    @break
+                                @case('menunggu')
+                                    <span class="text-yellow-600">Menunggu Pembayaran</span>
+                                    @break
+                                @case('ditolak')
+                                    <span class="text-red-600">Ditolak</span>
+                                    @break
+                                @case('kadaluarsa')
+                                    <span class="text-gray-600">Kadaluarsa</span>
+                                    @break
+                                @default
+                                    {{ $pay->status }}
+                            @endswitch
+                        @else
+                            —
+                        @endif
+                    </p>
+                </div>
+                <div class="bg-stone-50 rounded-xl p-4">
+                    <p class="text-xs text-stone-400 uppercase tracking-wide font-medium">Metode</p>
+                    <p class="font-semibold text-stone-800 mt-1">{{ $pay->metode ?? '—' }}</p>
                 </div>
             </div>
 
@@ -105,17 +133,55 @@
                 </div>
             </div>
 
-            <div class="rounded-xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-start gap-3">
-                <svg class="size-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                <div>
-                    <p class="font-semibold">Menunggu Konfirmasi Pemilik</p>
-                    <p class="mt-1 text-yellow-700">Pembayaran Anda telah diterima. Pemilik properti akan mengkonfirmasi sewa Anda. Kami akan memberi tahu Anda setelah dikonfirmasi.</p>
-                </div>
-            </div>
+            @php
+                $pay = $sewa->pembayaran->first();
+            @endphp
 
-            <a wire:navigate href="/account/sewa" class="block w-full text-center rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition">
-                Lihat Sewa Saya
-            </a>
+            @if ($pay && $pay->status === 'lunas')
+                <div class="rounded-xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-start gap-3">
+                    <svg class="size-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                    <div>
+                        <p class="font-semibold">Menunggu Konfirmasi Pemilik</p>
+                        <p class="mt-1 text-yellow-700">Pembayaran Anda telah diterima. Pemilik properti akan mengkonfirmasi sewa Anda. Kami akan memberi tahu Anda setelah dikonfirmasi.</p>
+                    </div>
+                </div>
+            @elseif ($pay && $pay->status === 'menunggu')
+                <div class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 flex items-start gap-3">
+                    <svg class="size-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="font-semibold">Menunggu Pembayaran</p>
+                        <p class="mt-1 text-blue-700">Pembayaran Anda sedang diproses. Silakan selesaikan pembayaran melalui halaman Midtrans.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <form action="{{ route('payment.check-status') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="sewa_id" value="{{ $sewa->id }}">
+                        <button type="submit" class="w-full rounded-xl bg-[#a67f71] px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition">
+                            Cek Status Pembayaran
+                        </button>
+                    </form>
+                    <a href="/account/sewa" class="block w-full text-center rounded-xl border border-stone-300 px-6 py-3 text-sm font-semibold text-stone-700 hover:bg-stone-50 transition">
+                        Kembali ke Sewa Saya
+                    </a>
+                </div>
+            @elseif ($pay && ($pay->status === 'ditolak' || $pay->status === 'kadaluarsa'))
+                <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800 flex items-start gap-3">
+                    <svg class="size-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="font-semibold">Pembayaran {{ $pay->status === 'ditolak' ? 'Ditolak' : 'Kadaluarsa' }}</p>
+                        <p class="mt-1 text-red-700">Pembayaran gagal. Silakan lakukan sewa ulang untuk mencoba lagi.</p>
+                    </div>
+                </div>
+                <a wire:navigate href="/account/sewa" class="block w-full text-center rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition">
+                    Lihat Sewa Saya
+                </a>
+            @else
+                <a wire:navigate href="/account/sewa" class="block w-full text-center rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition">
+                    Lihat Sewa Saya
+                </a>
+            @endif
         </div>
     </div>
 </div>

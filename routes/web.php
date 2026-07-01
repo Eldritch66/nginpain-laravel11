@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\MidtransCallbackController;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\RoleSelect;
 use App\Livewire\Pembayaran\PembayaranForm;
@@ -12,7 +13,10 @@ use App\Models\Sewa;
 use App\Models\TiketBantuan;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\MidtransService;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +55,9 @@ Route::get('/role', RoleSelect::class)
     ->middleware('auth')
     ->name('role');
 
+Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle'])
+    ->withoutMiddleware(VerifyCsrfToken::class);
+
 Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
@@ -65,7 +72,107 @@ Route::get('/properti/{id}', PropertiDetail::class)->name('properti.show');
 Route::view('/tentang', 'tentang')->name('tentang');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/pembayaran/{sewaId}', PembayaranForm::class)->name('pembayaran.form');
+    Route::get('/pembayaran', PembayaranForm::class)->name('pembayaran.form');
+
+    Route::get('/payment/finish', function () {
+        $orderId = request('order_id');
+
+        if (! $orderId) {
+            return redirect('/');
+        }
+
+        $booking = Cache::get('booking_'.$orderId) ?? session('booking');
+
+        if (! $booking || ($booking['order_id'] ?? null) !== $orderId) {
+            $midtrans = app(MidtransService::class);
+
+            try {
+                $response = $midtrans->status($orderId);
+                $transactionStatus = $response->transaction_status ?? '';
+
+                if (in_array($transactionStatus, ['capture', 'settlement'])) {
+                    return redirect('/account/sewa')->with('error', 'Pembayaran berhasil diverifikasi, tapi data booking tidak ditemukan. Silakan hubungi admin.');
+                }
+
+                if (in_array($transactionStatus, ['pending'])) {
+                    return redirect('/pembayaran')->with('error', 'Pembayaran masih pending. Data booking tidak ditemukan. Silakan coba sewa ulang.');
+                }
+
+                return redirect('/pembayaran')->with('error', 'Pembayaran tidak berhasil ('.$transactionStatus.'). Silakan coba lagi.');
+            } catch (Throwable) {
+                return redirect('/')->with('error', 'Sesi booking tidak valid. Silakan pilih properti terlebih dahulu.');
+            }
+        }
+
+        $midtrans = app(MidtransService::class);
+
+        try {
+            $response = $midtrans->status($orderId);
+            $transactionStatus = $response->transaction_status ?? '';
+
+            if (! in_array($transactionStatus, ['capture', 'settlement', 'pending'])) {
+                Cache::forget('booking_'.$orderId);
+                session()->forget('booking');
+
+                return redirect('/pembayaran')->with('error', 'Pembayaran '.$transactionStatus.'. Silakan coba lagi.');
+            }
+
+            $user = Auth::user();
+
+            $sewa = DB::transaction(function () use ($booking, $orderId, $response, $user) {
+                $isLunas = in_array($response->transaction_status, ['capture', 'settlement']);
+
+                $sewa = Sewa::create([
+                    'penyewa_id' => $user->id,
+                    'properti_id' => $booking['properti_id'],
+                    'tanggal_mulai' => $booking['start_date'],
+                    'tanggal_selesai' => $booking['end_date'],
+                    'durasi_bulan' => $booking['months'],
+                    'total_harga' => $booking['total_harga'],
+                    'biaya_layanan' => $booking['service_fee'],
+                    'status_sewa' => 'pending',
+                ]);
+
+                $sewa->pembayaran()->create([
+                    'kode_bayar' => $orderId,
+                    'jumlah' => $booking['grand_total'],
+                    'metode' => $response->payment_type ?? 'midtrans',
+                    'status' => $isLunas ? 'lunas' : 'menunggu',
+                    'snap_token' => $booking['snap_token'] ?? null,
+                    'midtrans_transaction_id' => $response->transaction_id ?? null,
+                    'dibayar_pada' => $isLunas ? now() : null,
+                ]);
+
+                if ($isLunas) {
+                    $sewa->generateKodeBooking();
+                }
+
+                return $sewa;
+            });
+
+            Cache::forget('booking_'.$orderId);
+            session()->forget('booking');
+
+            return redirect('/account/struk/'.$sewa->id);
+        } catch (Throwable $e) {
+            return redirect('/pembayaran')->with('error', 'Gagal memeriksa status: '.$e->getMessage());
+        }
+    })->name('payment.finish');
+
+    Route::post('/payment/check-status', function () {
+        $sewaId = request('sewa_id');
+        $user = Auth::user();
+
+        $sewa = Sewa::where('penyewa_id', $user->id)->findOrFail($sewaId);
+        $pembayaran = $sewa->pembayaran()->latest()->first();
+
+        if ($pembayaran && $pembayaran->status === 'menunggu') {
+            $midtrans = app(MidtransService::class);
+            $midtrans->updateStatus($pembayaran);
+        }
+
+        return redirect('/account/struk/'.$sewaId);
+    })->name('payment.check-status');
 
     Route::get('/account', function () {
         $user = Auth::user();

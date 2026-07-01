@@ -9,7 +9,8 @@ class Pembayaran extends Model
     protected $table = 'pembayaran';
 
     protected $fillable = [
-        'kode_bayar', 'sewa_id', 'jumlah', 'metode', 'status', 'periode_bulan', 'dibayar_pada',
+        'kode_bayar', 'sewa_id', 'jumlah', 'metode', 'status', 'periode_bulan',
+        'dibayar_pada', 'snap_token', 'midtrans_transaction_id',
     ];
 
     protected static function booted(): void
@@ -21,12 +22,16 @@ class Pembayaran extends Model
 
             $map = [
                 'QRIS' => 'QRS',
-                'Transfer BCA' => 'BCA',
-                'PayPal' => 'PYP',
+                'qris' => 'QRS',
+                'bank_transfer' => 'BTR',
+                'credit_card' => 'CC',
+                'gopay' => 'GOP',
+                'shopeepay' => 'SHP',
+                'other' => 'OTH',
             ];
 
             $prefix = 'PAY';
-            $method = $map[$pembayaran->metode] ?? 'XXX';
+            $method = $map[$pembayaran->metode] ?? 'MDR';
             $last = static::where('kode_bayar', 'like', $prefix.'-'.$method.'-%')
                 ->orderBy('kode_bayar', 'desc')
                 ->lockForUpdate()
